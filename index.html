@@ -678,9 +678,9 @@
             height: 54px;
         }
 
-        .grid-preview.g2 { grid-template-columns: 1fr 1fr; }
-        .grid-preview.g3 { grid-template-columns: 1fr 1fr 1fr; }
-        .grid-preview.g4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+        .grid-preview.g3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-preview.g4 { grid-template-columns: repeat(4, 1fr); }
+        .grid-preview.g5 { grid-template-columns: repeat(5, 1fr); }
 
         .grid-preview-cell {
             background: rgba(255, 45, 117, 0.25);
@@ -747,7 +747,7 @@
         <div id="top-center-area">
             <div id="timer">00:00</div>
             <div id="puzzle-info">
-                <div class="info-item">Pieces: <span class="info-value" id="piece-count">0</span>/9</div>
+                <div class="info-item">Pieces: <span class="info-value" id="piece-count">0</span>/<span id="total-pieces">9</span></div>
                 <div class="info-item">Placed: <span class="info-value" id="completion">0</span>%</div>
             </div>
         </div>
@@ -773,7 +773,7 @@
         <div class="step-list">
             <div class="step-item">
                 <div class="step-icon">✊</div>
-                <div><b>Make a Fist</b> to see the 3x3 framing grid box.</div>
+                <div><b>Make a Fist</b> to see the framing grid box.</div>
             </div>
             <div class="step-item">
                 <div class="step-icon">🖐️</div>
@@ -799,6 +799,44 @@
         <h3>👑 Top Rankings</h3>
         <div id="leaderboard-list">
             <!-- Items added via JS -->
+        </div>
+    </div>
+
+    <!-- Grid Size Selector Modal -->
+    <div id="grid-select-modal">
+        <h2 class="pulse-text">🧩 Choose Puzzle Size</h2>
+        <p>Pick the difficulty level for your puzzle</p>
+        <div class="grid-options">
+            <button class="grid-option-btn" data-size="3">
+                <div class="grid-preview g3">
+                    <div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div>
+                    <div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div>
+                    <div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div>
+                </div>
+                <span class="grid-label">3 × 3</span>
+                <span class="grid-pieces">9 pieces</span>
+            </button>
+            <button class="grid-option-btn" data-size="4">
+                <div class="grid-preview g4">
+                    <div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div>
+                    <div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div>
+                    <div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div>
+                    <div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div>
+                </div>
+                <span class="grid-label">4 × 4</span>
+                <span class="grid-pieces">16 pieces</span>
+            </button>
+            <button class="grid-option-btn" data-size="5">
+                <div class="grid-preview g5">
+                    <div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div>
+                    <div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div>
+                    <div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div>
+                    <div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div>
+                    <div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div><div class="grid-preview-cell"></div>
+                </div>
+                <span class="grid-label">5 × 5</span>
+                <span class="grid-pieces">25 pieces</span>
+            </button>
         </div>
     </div>
 
