@@ -38,6 +38,8 @@ class PuzzleGameApp {
         this.startGameBtn = document.getElementById('start-game-btn');
         this.solveGuide = document.getElementById('solve-guide');
         this.gotItBtn = document.getElementById('got-it-btn');
+        this.gridSelectModal = document.getElementById('grid-select-modal');
+        this.totalPiecesEl = document.getElementById('total-pieces');
 
         this.frameCtx = this.frameCanvas ? this.frameCanvas.getContext('2d') : null;
         this.puzzleCtx = this.puzzleCanvas ? this.puzzleCanvas.getContext('2d') : null;
@@ -47,6 +49,7 @@ class PuzzleGameApp {
         this.puzzle = null;
 
         this.state = 'camera'; // camera | framing | puzzle | solved
+        this.gridSize = 3; // default grid size
         this.captureCanvas = document.createElement('canvas');
         this.selectedPiece = null;
         this.lastPos = { x: 0, y: 0 };
@@ -77,7 +80,7 @@ class PuzzleGameApp {
 
             this.gesture = new GestureRecognizer(this.video, this.handCanvas);
             await this.gesture.init();
-            this.puzzle = new PuzzleGenerator(this.captureCanvas, 3);
+            this.puzzle = new PuzzleGenerator(this.captureCanvas, this.gridSize);
 
             this.closeBtn.addEventListener('click', () => this.closePuzzle());
             this.shuffleBtn.addEventListener('click', () => this.shufflePuzzle());
@@ -86,8 +89,19 @@ class PuzzleGameApp {
             if (this.startGameBtn) {
                 this.startGameBtn.addEventListener('click', () => {
                     if (this.howToGuide) this.howToGuide.style.display = 'none';
+                    if (this.gridSelectModal) this.gridSelectModal.style.display = 'flex';
                 });
             }
+
+            // Grid size option buttons
+            document.querySelectorAll('.grid-option-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    this.gridSize = parseInt(btn.dataset.size);
+                    this.puzzle = new PuzzleGenerator(this.captureCanvas, this.gridSize);
+                    if (this.totalPiecesEl) this.totalPiecesEl.textContent = this.gridSize * this.gridSize;
+                    if (this.gridSelectModal) this.gridSelectModal.style.display = 'none';
+                });
+            });
             if (this.gotItBtn) {
                 this.gotItBtn.addEventListener('click', () => {
                     if (this.solveGuide) this.solveGuide.style.display = 'none';
@@ -179,7 +193,8 @@ class PuzzleGameApp {
             const rawY = my - (boxSize + 60) / ch;
             this.lastFrameRaw = { x: rawX, y: rawY, width: boxSize / cw, height: boxSize / ch };
 
-            // Draw 3x3 trace
+            // Draw grid trace matching selected size
+            const gs = this.gridSize;
             this.frameCtx.strokeStyle = '#ff2d75';
             this.frameCtx.lineWidth = 2;
             this.frameCtx.strokeRect(fx, fy, boxSize, boxSize);
@@ -188,14 +203,14 @@ class PuzzleGameApp {
             this.frameCtx.beginPath();
             this.frameCtx.setLineDash([5, 5]);
             // Verticals
-            for (let i = 1; i < 3; i++) {
-                const lx = fx + (boxSize / 3) * i;
+            for (let i = 1; i < gs; i++) {
+                const lx = fx + (boxSize / gs) * i;
                 this.frameCtx.moveTo(lx, fy);
                 this.frameCtx.lineTo(lx, fy + boxSize);
             }
             // Horizontals
-            for (let i = 1; i < 3; i++) {
-                const ly = fy + (boxSize / 3) * i;
+            for (let i = 1; i < gs; i++) {
+                const ly = fy + (boxSize / gs) * i;
                 this.frameCtx.moveTo(fx, ly);
                 this.frameCtx.lineTo(fx + boxSize, ly);
             }
@@ -409,7 +424,9 @@ class PuzzleGameApp {
 
     updatePuzzleInfo() {
         const placed = this.puzzle.pieces.filter(p => p.isPlaced).length;
+        const total = this.gridSize * this.gridSize;
         if (this.pieceCountEl) this.pieceCountEl.textContent = placed;
+        if (this.totalPiecesEl) this.totalPiecesEl.textContent = total;
         if (this.completionEl) this.completionEl.textContent = this.puzzle.getCompletion();
     }
 
@@ -430,6 +447,7 @@ class PuzzleGameApp {
         if (this.solutionContainer) this.solutionContainer.style.display = 'none';
         if (this.leaderboardModal) this.leaderboardModal.style.display = 'none';
         if (this.leaderboardDisplay) this.leaderboardDisplay.style.display = 'none';
+        if (this.gridSelectModal) this.gridSelectModal.style.display = 'flex';
         this.selectedPiece = null;
         this.imageCache = {};
     }
