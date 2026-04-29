@@ -556,5 +556,99 @@ class PuzzleGameApp {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => { window.app = new PuzzleGameApp(); });
+function initFullscreen() {
+    const fsBtn = document.getElementById('fullscreen-btn');
+    const fsMax = document.getElementById('fs-maximize');
+    const fsMin = document.getElementById('fs-minimize');
+    
+    if (fsBtn) {
+        console.log('Fullscreen button found and attaching listener');
+        const toggleFS = () => {
+            console.log('Toggle fullscreen called');
+            const doc = window.document;
+            const body = doc.body;
+            
+            const requestFS = body.requestFullscreen || body.mozRequestFullScreen || body.webkitRequestFullscreen || body.msRequestFullscreen;
+            const exitFS = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+            const fsElem = doc.fullscreenElement || doc.mozFullScreenElement || doc.webkitFullScreenElement || doc.msFullscreenElement;
+
+            if (!fsElem) {
+                if (requestFS) {
+                    requestFS.call(body, { navigationUI: 'hide' })
+                        .then(() => console.log('Successfully entered fullscreen'))
+                        .catch(e => {
+                            console.error('FS Request failed:', e);
+                            alert('Fullscreen request failed. Please ensure you are interacting with the page.');
+                        });
+                }
+            } else {
+                if (exitFS) {
+                    exitFS.call(doc)
+                        .then(() => console.log('Successfully exited fullscreen'))
+                        .catch(e => console.error('FS Exit failed:', e));
+                }
+            }
+        };
+
+        fsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleFS();
+        });
+        
+        const updateIcons = () => {
+            const isFS = !!(document.fullscreenElement || document.mozFullScreenElement || document.webkitFullScreenElement || document.msFullscreenElement);
+            console.log('Fullscreen state changed, isFS:', isFS);
+            if (fsMax) fsMax.style.display = isFS ? 'none' : 'block';
+            if (fsMin) fsMin.style.display = isFS ? 'block' : 'none';
+        };
+
+        ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(evt => {
+            document.addEventListener(evt, updateIcons);
+        });
+    } else {
+        console.error('Fullscreen button NOT found in DOM during startApp');
+    }
+}
+
+function playIntro() {
+    return new Promise((resolve) => {
+        const introScreen = document.getElementById('intro-screen');
+        if (!introScreen) {
+            resolve();
+            return;
+        }
+
+        // Intro duration: 8 seconds animation + 1s cinematic fade out
+        const INTRO_DURATION = 8000;
+
+        setTimeout(() => {
+            introScreen.classList.add('fade-out');
+            // Wait for the cinematic scale-up fade animation
+            setTimeout(() => {
+                introScreen.remove();
+                resolve();
+            }, 1000);
+        }, INTRO_DURATION);
+    });
+}
+
+async function startApp() {
+    // Initialize fullscreen toggle immediately (it's UI-only)
+    initFullscreen();
+
+    // Play the intro/welcome animation first
+    await playIntro();
+
+    // Only after intro completes, start the game
+    if (!window.app) {
+        window.app = new PuzzleGameApp();
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startApp);
+} else {
+    startApp();
+}
+
 window.addEventListener('beforeunload', () => { if (window.app) window.app.destroy(); });
