@@ -6,6 +6,217 @@
     <title>Snap-n-Solve | Gesture Puzzle</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
     <style>
+        /* ===== CINEMATIC INTRO SCREEN ===== */
+        #intro-screen {
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 99999; background: #000;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        #intro-screen.fade-out {
+            animation: introFadeOut 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @keyframes introFadeOut {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.08); pointer-events: none; }
+        }
+
+        /* Shutter lines */
+        .intro-shutter-top, .intro-shutter-bot {
+            position: absolute; left: 0; width: 100%; height: 50%;
+            background: #111; z-index: 48;
+        }
+        .intro-shutter-top { top: 0; animation: shutterTop 1.4s cubic-bezier(0.7,0,0.3,1) 0s forwards; }
+        .intro-shutter-bot { bottom: 0; animation: shutterBot 1.4s cubic-bezier(0.7,0,0.3,1) 0s forwards; }
+        @keyframes shutterTop {
+            0% { transform: translateY(0); }
+            25% { transform: translateY(0); }
+            55% { transform: translateY(-100%); }
+            100% { transform: translateY(-100%); }
+        }
+        @keyframes shutterBot {
+            0% { transform: translateY(0); }
+            25% { transform: translateY(0); }
+            55% { transform: translateY(100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        /* Ambient bg after shutter opens */
+        .intro-bg {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at 50% 45%, rgba(255,45,117,0.08) 0%, #000 65%);
+            opacity: 0;
+            animation: bgReveal 1.5s ease 0.8s forwards;
+        }
+        @keyframes bgReveal { to { opacity: 1; } }
+
+        /* Scanlines */
+        .intro-scanlines {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 2; pointer-events: none;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,45,117,0.012) 2px, rgba(255,45,117,0.012) 4px);
+            opacity: 0; animation: bgReveal 1s ease 1.2s forwards;
+        }
+
+        /* === PHASE 2: Logo zooms backward from flash === */
+        .intro-logo-wrap {
+            position: relative; z-index: 10;
+            opacity: 0; transform: scale(5);
+            animation: logoZoomBack 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+        }
+        @keyframes logoZoomBack {
+            0% { opacity: 0; transform: scale(5) rotate(0deg); filter: brightness(3) blur(20px); }
+            20% { opacity: 1; filter: brightness(1.8) blur(8px); }
+            60% { transform: scale(0.95) rotate(-2deg); filter: brightness(1) blur(0px); }
+            80% { transform: scale(1.03) rotate(1deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); filter: brightness(1) blur(0px); }
+        }
+        .intro-logo-wrap img {
+            width: 200px; height: 200px; object-fit: contain;
+            filter: drop-shadow(0 0 30px rgba(255,45,117,0.8)) drop-shadow(0 0 70px rgba(255,45,117,0.4));
+        }
+
+        /* Pulsing glow behind logo */
+        .intro-logo-glow {
+            position: absolute; top: 50%; left: 50%;
+            width: 250px; height: 250px;
+            transform: translate(-50%,-50%);
+            border-radius: 50%; opacity: 0;
+            background: radial-gradient(circle, rgba(255,45,117,0.3) 0%, transparent 70%);
+            animation: glowPulse 2s ease-in-out 1.8s infinite alternate;
+        }
+        @keyframes glowPulse {
+            0% { opacity: 0.4; transform: translate(-50%,-50%) scale(1); }
+            100% { opacity: 0.8; transform: translate(-50%,-50%) scale(1.3); }
+        }
+
+        /* Neon rings bursting outward */
+        .intro-ring {
+            position: absolute; top: 50%; left: 50%;
+            border-radius: 50%; border: 2px solid rgba(255,45,117,0.5);
+            transform: translate(-50%,-50%); opacity: 0; z-index: 9;
+        }
+        .intro-ring:nth-child(1) { animation: ringBurst 1.2s ease-out 1.0s forwards; }
+        .intro-ring:nth-child(2) { animation: ringBurst 1.4s ease-out 1.3s forwards; }
+        .intro-ring:nth-child(3) { animation: ringBurst 1.6s ease-out 1.6s forwards; }
+        @keyframes ringBurst {
+            0% { width: 60px; height: 60px; opacity: 0.8; border-width: 2px; }
+            100% { width: 500px; height: 500px; opacity: 0; border-width: 0.5px; }
+        }
+
+        /* === PHASE 3: Title cinematic reveal === */
+        .intro-title {
+            z-index: 10; font-family: 'Outfit','Inter',sans-serif;
+            font-size: 54px; font-weight: 900; color: #fff;
+            margin-top: 28px; letter-spacing: 4px;
+            opacity: 0; transform: translateY(40px) scale(0.9);
+            animation: titleCinematic 1s cubic-bezier(0.16, 1, 0.3, 1) 2.0s forwards;
+            text-shadow: 0 0 15px rgba(255,45,117,0.5), 0 4px 20px rgba(0,0,0,0.6);
+        }
+        @keyframes titleCinematic {
+            0% { opacity: 0; transform: translateY(40px) scale(0.9); filter: blur(8px); }
+            60% { filter: blur(0); }
+            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+        .intro-title span { color: var(--neon-pink); text-shadow: 0 0 25px rgba(255,45,117,0.8), 0 0 50px rgba(255,45,117,0.3); }
+
+        /* Divider */
+        .intro-divider {
+            z-index: 10; width: 0; height: 2px; margin-top: 16px;
+            background: linear-gradient(90deg, transparent, var(--neon-pink), transparent);
+            animation: divExpand 0.8s ease 2.6s forwards;
+            box-shadow: 0 0 12px rgba(255,45,117,0.5);
+        }
+        @keyframes divExpand { to { width: 320px; } }
+
+        /* === PHASE 4: Tagline words slam in === */
+        .intro-tagline {
+            z-index: 10; margin-top: 18px;
+            font-family: 'Outfit','Inter',sans-serif; font-size: 28px;
+            font-weight: 700; letter-spacing: 6px; text-transform: uppercase;
+        }
+        .intro-tagline .tag-word {
+            display: inline-block; opacity: 0; color: var(--soft-pink);
+            text-shadow: 0 0 20px rgba(255,45,117,0.6);
+        }
+        .intro-tagline .tag-word:nth-child(1) { animation: wordSlam 0.45s cubic-bezier(0.34,1.56,0.64,1) 3.0s forwards; }
+        .intro-tagline .tag-word:nth-child(2) { animation: wordSlam 0.45s cubic-bezier(0.34,1.56,0.64,1) 3.4s forwards; }
+        .intro-tagline .tag-word:nth-child(3) { animation: wordSlam 0.45s cubic-bezier(0.34,1.56,0.64,1) 3.8s forwards; }
+        @keyframes wordSlam {
+            0% { opacity: 0; transform: scale(2.5) translateY(-10px); filter: blur(10px); }
+            50% { filter: blur(0); }
+            70% { transform: scale(0.95) translateY(2px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
+
+        /* === PHASE 5: Subtitle types in === */
+        .intro-subtitle {
+            z-index: 10; font-family: 'Inter',sans-serif; font-size: 13px;
+            font-weight: 500; color: rgba(255,238,242,0.45);
+            margin-top: 14px; letter-spacing: 4px; text-transform: uppercase;
+            opacity: 0; overflow: hidden; white-space: nowrap;
+            border-right: 2px solid rgba(255,45,117,0.6);
+            animation: subtitleReveal 1.5s ease 5.0s forwards, cursorBlink 0.6s step-end 5.0s 5;
+        }
+        @keyframes subtitleReveal {
+            0% { opacity: 1; width: 0; }
+            100% { opacity: 1; width: 45em; }
+        }
+        @keyframes cursorBlink {
+            0%, 100% { border-color: rgba(255,45,117,0.6); }
+            50% { border-color: transparent; }
+        }
+
+        /* Floating particles */
+        .intro-particles {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 3; pointer-events: none;
+        }
+        .intro-particle {
+            position: absolute; width: 2px; height: 2px;
+            background: var(--neon-pink); border-radius: 50%; opacity: 0;
+            box-shadow: 0 0 6px var(--neon-pink);
+        }
+        .intro-particle:nth-child(1) { left:12%;top:25%; animation: pFloat 3.5s ease-in-out 1.2s infinite; }
+        .intro-particle:nth-child(2) { left:82%;top:18%; animation: pFloat 4s ease-in-out 1.5s infinite; }
+        .intro-particle:nth-child(3) { left:22%;top:72%; animation: pFloat 3s ease-in-out 1.8s infinite; }
+        .intro-particle:nth-child(4) { left:78%;top:78%; animation: pFloat 4.5s ease-in-out 1.1s infinite; }
+        .intro-particle:nth-child(5) { left:48%;top:12%; animation: pFloat 3.2s ease-in-out 2s infinite; }
+        .intro-particle:nth-child(6) { left:88%;top:48%; animation: pFloat 5s ease-in-out 1.4s infinite; }
+        .intro-particle:nth-child(7) { left:8%;top:55%; animation: pFloat 3.8s ease-in-out 1.7s infinite; }
+        .intro-particle:nth-child(8) { left:38%;top:88%; animation: pFloat 4.2s ease-in-out 1.3s infinite; }
+        @keyframes pFloat {
+            0%,100% { opacity:0; transform:translateY(0) scale(1); }
+            30% { opacity:0.6; }
+            50% { opacity:0.9; transform:translateY(-35px) scale(1.8); }
+            70% { opacity:0.4; }
+        }
+
+        /* Progress bar */
+        .intro-progress {
+            position: absolute; bottom: 50px; z-index: 10;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            opacity: 0; animation: fadeIn 0.5s ease 1.5s forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+        .intro-progress-label {
+            font-family: 'Inter',sans-serif; font-size: 10px; font-weight: 600;
+            color: rgba(255,238,242,0.3); letter-spacing: 3px; text-transform: uppercase;
+        }
+        .intro-progress-bar {
+            width: 180px; height: 2px;
+            background: rgba(255,45,117,0.12); border-radius: 2px; overflow: hidden;
+        }
+        .intro-progress-fill {
+            width: 0%; height: 100%; border-radius: 2px;
+            background: linear-gradient(90deg, var(--neon-pink), var(--soft-pink));
+            animation: progFill 5.5s cubic-bezier(0.4,0,0.2,1) 0.8s forwards;
+            box-shadow: 0 0 8px var(--neon-pink);
+        }
+        @keyframes progFill { 0%{width:0%} 100%{width:100%} }
         * {
             margin: 0;
             padding: 0;
@@ -208,6 +419,38 @@
         #close-btn:hover {
             background: #ff2222;
             transform: scale(1.05);
+        }
+
+        /* ===== FULLSCREEN TOGGLE ===== */
+        #fullscreen-btn {
+            position: absolute;
+            right: 30px;
+            width: 36px;
+            height: 36px;
+            background: rgba(74, 14, 42, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 45, 117, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 101;
+        }
+
+        #fullscreen-btn:hover {
+            background: rgba(255, 45, 117, 0.3);
+            border-color: var(--neon-pink);
+            transform: scale(1.1);
+            box-shadow: 0 0 12px var(--glow-pink);
+        }
+
+        /* Shift close-btn left when fullscreen btn is visible */
+        #close-btn {
+            right: 80px;
         }
 
         /* ===== STATUS INDICATOR ===== */
@@ -709,6 +952,82 @@
     </style>
 </head>
 <body>
+    <!-- ===== CINEMATIC INTRO SCREEN ===== -->
+    <div id="intro-screen">
+        <!-- Camera shutter panels -->
+        <div class="intro-shutter-top"></div>
+        <div class="intro-shutter-bot"></div>
+        <!-- Ambient background -->
+        <div class="intro-bg"></div>
+        <div class="intro-scanlines"></div>
+        <!-- Neon rings bursting from center -->
+        <div class="intro-ring"></div>
+        <div class="intro-ring"></div>
+        <div class="intro-ring"></div>
+        <!-- Floating particles -->
+        <div class="intro-particles">
+            <div class="intro-particle"></div>
+            <div class="intro-particle"></div>
+            <div class="intro-particle"></div>
+            <div class="intro-particle"></div>
+            <div class="intro-particle"></div>
+            <div class="intro-particle"></div>
+            <div class="intro-particle"></div>
+            <div class="intro-particle"></div>
+        </div>
+        <!-- Logo with glow -->
+        <div class="intro-logo-wrap">
+            <div class="intro-logo-glow"></div>
+            <img src="logo.png" alt="Snap-n-Solve Logo" id="intro-logo">
+        </div>
+        <!-- Title -->
+        <div class="intro-title"><span>Snap</span>-n-<span>Solve</span></div>
+        <div class="intro-divider"></div>
+        <!-- Tagline 1 -->
+        <div class="intro-tagline">
+            <span class="tag-word">Snap.&nbsp;</span>
+            <span class="tag-word">Solve.&nbsp;</span>
+            <span class="tag-word">Repeat.</span>
+        </div>
+        <!-- Tagline 2 -->
+        <div class="intro-subtitle">a touchless gesture controlled puzzle experience</div>
+        <!-- Progress bar -->
+        <div class="intro-progress">
+            <div class="intro-progress-bar">
+                <div class="intro-progress-fill"></div>
+            </div>
+            <div class="intro-progress-label">Initializing</div>
+        </div>
+    </div>
+
+    <!-- Process logo: remove black background, keep only neon glow -->
+    <script>
+    (function() {
+        var img = document.getElementById('intro-logo');
+        if (!img) return;
+        function process() {
+            var c = document.createElement('canvas');
+            c.width = img.naturalWidth; c.height = img.naturalHeight;
+            var ctx = c.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            var d = ctx.getImageData(0, 0, c.width, c.height);
+            var px = d.data;
+            for (var i = 0; i < px.length; i += 4) {
+                var brightness = px[i] * 0.299 + px[i+1] * 0.587 + px[i+2] * 0.114;
+                if (brightness < 50) {
+                    px[i+3] = 0; // fully transparent
+                } else if (brightness < 100) {
+                    px[i+3] = Math.round((brightness - 50) / 50 * 255); // fade in
+                }
+            }
+            ctx.putImageData(d, 0, 0);
+            img.src = c.toDataURL('image/png');
+        }
+        if (img.complete && img.naturalWidth > 0) { process(); }
+        else { img.onload = process; }
+    })();
+    </script>
+
     <!-- Always-visible camera feed -->
     <video id="video" playsinline autoplay muted></video>
 
@@ -753,6 +1072,20 @@
         </div>
 
         <button id="close-btn">New Game</button>
+        <button id="fullscreen-btn" title="Toggle Fullscreen">
+            <svg id="fs-maximize" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+            <svg id="fs-minimize" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                <polyline points="4 14 10 14 10 20"></polyline>
+                <polyline points="20 10 14 10 14 4"></polyline>
+                <line x1="14" y1="10" x2="21" y2="3"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+        </button>
     </div>
 
     <!-- Status bar -->
