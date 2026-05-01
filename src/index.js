@@ -57,11 +57,13 @@ class PuzzleGameApp {
         this.imageCache = {};
         this.timerStart = null;
         this.timerInterval = null;
+        this.moveCount = 0;
 
         // Frame tracking
         this.isFraming = false;
         this.lastFrameDisplay = null; // mirrored rect for display
         this.lastFrameRaw = null;     // raw rect for capture
+        this.isGameStarted = false;   // Gate gestures until guide/modal finished
 
         this.init();
     }
@@ -100,6 +102,7 @@ class PuzzleGameApp {
                     this.puzzle = new PuzzleGenerator(this.captureCanvas, this.gridSize);
                     if (this.totalPiecesEl) this.totalPiecesEl.textContent = this.gridSize * this.gridSize;
                     if (this.gridSelectModal) this.gridSelectModal.style.display = 'none';
+                    this.isGameStarted = true; // Gestures active now
                 });
             });
             if (this.gotItBtn) {
@@ -136,6 +139,16 @@ class PuzzleGameApp {
 
     // ===== GAME LOOP =====
     gameLoop = () => {
+        if (!this.isGameStarted) {
+            // Keep canvases clear while guide is open
+            if (this.gesture) this.gesture.clearCanvas();
+            if (this.frameCtx) {
+                this.frameCtx.clearRect(0, 0, this.frameCanvas.width, this.frameCanvas.height);
+            }
+            requestAnimationFrame(this.gameLoop);
+            return;
+        }
+
         const landmarks = this.gesture ? this.gesture.getLandmarks() : [];
 
         if (this.state === 'camera' || this.state === 'framing') {
@@ -260,6 +273,7 @@ class PuzzleGameApp {
         this.puzzle.generateFromFrame(this.captureCanvas, rawRect, cw, ch);
         this.puzzle.shufflePieces(cw, ch);
         this.imageCache = {};
+        this.moveCount = 0;
 
         // Show solution image on the right
         if (this.solutionContainer && this.puzzle.solution) {
@@ -300,6 +314,7 @@ class PuzzleGameApp {
             if (this.selectedPiece) {
                 this.selectedPiece.isDragging = false;
                 this.puzzle.snapToGrid(this.selectedPiece);
+                this.moveCount++;
                 this.selectedPiece = null;
                 this.updatePuzzleInfo();
             }
@@ -331,7 +346,7 @@ class PuzzleGameApp {
         const screenY = pinchPt.y * window.innerHeight;
 
         // Smooth the screen coordinates to reduce hand jitter
-        const smoothing = 0.45; // 0 = no smoothing, 1 = frozen
+        const smoothing = 0.25; // Lower = more responsive, higher = smoother but laggier
         this.smoothPos.x = this.smoothPos.x + (screenX - this.smoothPos.x) * (1 - smoothing);
         this.smoothPos.y = this.smoothPos.y + (screenY - this.smoothPos.y) * (1 - smoothing);
 
@@ -358,6 +373,7 @@ class PuzzleGameApp {
             if (this.selectedPiece) {
                 this.selectedPiece.isDragging = false;
                 this.puzzle.snapToGrid(this.selectedPiece);
+                this.moveCount++;
                 this.selectedPiece = null;
                 this.updatePuzzleInfo();
                 if (this.puzzle.isPuzzleSolved()) {
@@ -369,6 +385,8 @@ class PuzzleGameApp {
                     // Show leaderboard modal after a short delay
                     setTimeout(() => {
                         if (this.leaderboardModal) this.leaderboardModal.style.display = 'flex';
+                        const movesDisplay = document.getElementById('modal-moves-count');
+                        if (movesDisplay) movesDisplay.textContent = this.moveCount;
                     }, 1500);
                 }
             }
@@ -428,6 +446,8 @@ class PuzzleGameApp {
         if (this.pieceCountEl) this.pieceCountEl.textContent = placed;
         if (this.totalPiecesEl) this.totalPiecesEl.textContent = total;
         if (this.completionEl) this.completionEl.textContent = this.puzzle.getCompletion();
+        const moveEl = document.getElementById('move-count');
+        if (moveEl) moveEl.textContent = this.moveCount;
     }
 
     closePuzzle() {
@@ -476,6 +496,7 @@ class PuzzleGameApp {
             if (this.selectedPiece) {
                 this.selectedPiece.isDragging = false;
                 this.puzzle.snapToGrid(this.selectedPiece);
+                this.moveCount++;
                 this.selectedPiece = null;
                 this.updatePuzzleInfo();
                 if (this.puzzle.isPuzzleSolved()) {
@@ -484,6 +505,8 @@ class PuzzleGameApp {
                     if (this.celebration) this.celebration.classList.add('active');
                     setTimeout(() => {
                         if (this.leaderboardModal) this.leaderboardModal.style.display = 'flex';
+                        const movesDisplay = document.getElementById('modal-moves-count');
+                        if (movesDisplay) movesDisplay.textContent = this.moveCount;
                     }, 1500);
                 }
             }
@@ -501,6 +524,7 @@ class PuzzleGameApp {
         if (!this.puzzle) return;
         this.puzzle.resetPuzzle(this.puzzleCanvas.width, this.puzzleCanvas.height);
         this.selectedPiece = null;
+        this.moveCount = 0;
         if (this.celebration) this.celebration.classList.remove('active');
         this.state = 'puzzle';
         this.updatePuzzleInfo();
@@ -514,8 +538,10 @@ class PuzzleGameApp {
         const [mins, secs] = timeStr.split(':').map(Number);
         const totalSeconds = mins * 60 + secs;
 
+        const moves = this.moveCount;
+
         const scores = this.loadLeaderboard();
-        scores.push({ name, time: timeStr, seconds: totalSeconds, date: new Date().toISOString() });
+        scores.push({ name, time: timeStr, seconds: totalSeconds, moves: moves, date: new Date().toISOString() });
         
         // Sort by seconds (ascending) and keep top 10
         scores.sort((a, b) => a.seconds - b.seconds);
@@ -543,6 +569,7 @@ class PuzzleGameApp {
             item.innerHTML = `
                 <span class="rank">#${index + 1}</span>
                 <span class="name">${score.name}</span>
+                <span class="moves">${score.moves !== undefined ? score.moves : '-'}</span>
                 <span class="time">${score.time}</span>
             `;
             this.leaderboardList.appendChild(item);

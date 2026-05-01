@@ -731,7 +731,25 @@
 
         .leaderboard-item .rank { color: var(--soft-pink); font-weight: bold; width: 25px; }
         .leaderboard-item .name { flex: 1; }
-        .leaderboard-item .time { font-family: monospace; }
+        .leaderboard-item .moves { font-family: monospace; color: rgba(255,200,100,0.9); width: 50px; text-align: center; font-size: 12px; }
+        .leaderboard-item .time { font-family: monospace; width: 50px; text-align: right; }
+
+        .leaderboard-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 45, 117, 0.15);
+        }
+        .leaderboard-header span:nth-child(1) { width: 25px; }
+        .leaderboard-header span:nth-child(2) { flex: 1; }
+        .leaderboard-header span:nth-child(3) { width: 50px; text-align: center; }
+        .leaderboard-header span:nth-child(4) { width: 50px; text-align: right; }
         /* ===== HOW TO GUIDE ===== */
         #how-to-guide {
             position: fixed;
@@ -1068,6 +1086,7 @@
             <div id="puzzle-info">
                 <div class="info-item">Pieces: <span class="info-value" id="piece-count">0</span>/<span id="total-pieces">9</span></div>
                 <div class="info-item">Placed: <span class="info-value" id="completion">0</span>%</div>
+                <div class="info-item">Moves: <span class="info-value" id="move-count">0</span></div>
             </div>
         </div>
 
@@ -1122,7 +1141,7 @@
     <!-- Leaderboard Input Modal -->
     <div id="leaderboard-modal">
         <h2>🏆 Well Done!</h2>
-        <p>✨ Save your score to the leaderboard ✨</p>
+        <p>✨ You completed the puzzle in <strong id="modal-moves-count">0</strong> moves! ✨</p>
         <input type="text" id="user-name-input" placeholder="Your Name" maxlength="20">
         <button id="save-score-btn">💾 Save</button>
     </div>
@@ -1130,6 +1149,12 @@
     <!-- Leaderboard Display -->
     <div id="leaderboard-display">
         <h3>👑 Top Rankings</h3>
+        <div class="leaderboard-header">
+            <span>#</span>
+            <span>Name</span>
+            <span>Moves</span>
+            <span>Time</span>
+        </div>
         <div id="leaderboard-list">
             <!-- Items added via JS -->
         </div>

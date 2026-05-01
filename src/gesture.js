@@ -17,6 +17,8 @@ export class GestureRecognizer {
         this.lastLandmarks = [];
         this.frameCounter = 0;
         this.pinchThreshold = 0.06;
+        this.pinchReleaseThreshold = 0.09; // Hysteresis: wider gap needed to release
+        this.isPinching = false;
         this.fistPoint = null;
     }
 
@@ -59,12 +61,31 @@ export class GestureRecognizer {
     stopDetection() { this.detectionRunning = false; this.clearCanvas(); }
     getLandmarks() { return this.lastLandmarks; }
 
-    /** Detect pinch on a single hand */
+    /** Detect pinch on a single hand (with hysteresis to prevent flicker) */
     detectPinch(handLandmarks) {
-        if (!handLandmarks || handLandmarks.length < 9) return false;
+        if (!handLandmarks || handLandmarks.length < 9) {
+            this.isPinching = false;
+            return false;
+        }
         const t = handLandmarks[4], i = handLandmarks[8];
-        if (!t || !i) return false;
-        return Math.sqrt((t.x - i.x) ** 2 + (t.y - i.y) ** 2) < this.pinchThreshold;
+        if (!t || !i) {
+            this.isPinching = false;
+            return false;
+        }
+        const dist = Math.sqrt((t.x - i.x) ** 2 + (t.y - i.y) ** 2);
+
+        if (this.isPinching) {
+            // Already pinching — need wider distance to release
+            if (dist > this.pinchReleaseThreshold) {
+                this.isPinching = false;
+            }
+        } else {
+            // Not pinching — need close distance to start
+            if (dist < this.pinchThreshold) {
+                this.isPinching = true;
+            }
+        }
+        return this.isPinching;
     }
 
     /** Get pinch midpoint (normalized, NOT mirrored) */
