@@ -239,6 +239,42 @@
             --glow-pink: rgba(255, 45, 117, 0.4);
         }
 
+        /* Neon SVG Icons */
+        .neon-icon {
+            display: inline-block;
+            width: 1em; height: 1em;
+            vertical-align: -0.15em;
+            fill: none;
+            stroke: var(--neon-pink);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 4px var(--glow-pink));
+        }
+        .neon-icon.filled { fill: var(--neon-pink); stroke: none; }
+        .neon-icon.lg { width: 48px; height: 48px; }
+        .step-icon .neon-icon { width: 32px; height: 32px; stroke-width: 2.2; }
+        .mode-icon .neon-icon { width: 52px; height: 52px; stroke-width: 1.6; }
+        #times-up-overlay h1 .neon-icon { width: 64px; height: 64px; vertical-align: -0.1em; }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--neon-pink);
+            border-radius: 50%;
+            color: var(--neon-pink);
+            font-weight: bold;
+            font-family: 'Inter', sans-serif;
+            font-size: 1.2rem;
+            margin-right: 15px;
+            flex-shrink: 0;
+            box-shadow: 0 0 10px var(--glow-pink);
+            text-shadow: 0 0 5px var(--glow-pink);
+        }
+
         .pulse-text {
             animation: textPulse 2s ease-in-out infinite alternate;
         }
@@ -967,6 +1003,202 @@
             color: rgba(255, 255, 255, 0.5);
             font-weight: 600;
         }
+
+        /* ===== MODE SELECT MODAL ===== */
+        #mode-select-modal {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(74, 14, 42, 0.95);
+            backdrop-filter: blur(25px);
+            border: 2px solid var(--neon-pink);
+            border-radius: 24px;
+            padding: 40px 45px;
+            z-index: 3500;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(255, 45, 117, 0.4);
+            animation: modalFadeIn 0.3s ease;
+        }
+        #mode-select-modal h2 {
+            margin: 0; color: var(--neon-pink);
+            font-size: 22px; font-weight: 800;
+        }
+        #mode-select-modal p {
+            color: rgba(255,255,255,0.7);
+            font-size: 14px; margin: -8px 0 0 0;
+        }
+        .mode-options {
+            display: flex; gap: 20px;
+        }
+        .mode-card {
+            background: rgba(255, 45, 117, 0.06);
+            border: 2px solid rgba(255, 45, 117, 0.25);
+            border-radius: 20px;
+            padding: 28px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            min-width: 170px;
+            position: relative;
+            overflow: hidden;
+        }
+        .mode-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 0%, rgba(255,45,117,0.08) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .mode-card:hover::before { opacity: 1; }
+        .mode-card:hover {
+            border-color: var(--neon-pink);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(255, 45, 117, 0.3);
+        }
+        .mode-card .mode-icon {
+            font-size: 40px;
+            line-height: 1;
+        }
+        .mode-card .mode-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 18px; font-weight: 800;
+            color: #fff; letter-spacing: 1px;
+        }
+        .mode-card .mode-desc {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        /* ===== TIMER SELECT MODAL ===== */
+        #timer-select-modal {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(74, 14, 42, 0.95);
+            backdrop-filter: blur(25px);
+            border: 2px solid var(--neon-pink);
+            border-radius: 24px;
+            padding: 40px 45px;
+            z-index: 3500;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(255, 45, 117, 0.4);
+            animation: modalFadeIn 0.3s ease;
+        }
+        #timer-select-modal h2 {
+            margin: 0; color: var(--neon-pink);
+            font-size: 22px; font-weight: 800;
+        }
+        #timer-select-modal p {
+            color: rgba(255,255,255,0.7);
+            font-size: 14px; margin: -8px 0 0 0;
+        }
+        .timer-options {
+            display: flex; gap: 14px;
+        }
+        .timer-option-btn {
+            background: rgba(255, 45, 117, 0.08);
+            border: 2px solid rgba(255, 45, 117, 0.3);
+            border-radius: 16px;
+            padding: 18px 22px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            min-width: 80px;
+        }
+        .timer-option-btn:hover {
+            background: rgba(255, 45, 117, 0.2);
+            border-color: var(--neon-pink);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 45, 117, 0.3);
+        }
+        .timer-option-btn .timer-value {
+            font-family: 'Inter', monospace;
+            font-size: 22px; font-weight: 800;
+            color: #fff;
+        }
+        .timer-option-btn .timer-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Back button for modals */
+        .modal-back-btn {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.6);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .modal-back-btn:hover {
+            border-color: rgba(255,255,255,0.5);
+            color: #fff;
+        }
+
+        /* ===== TIME'S UP OVERLAY ===== */
+        #times-up-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            z-index: 5000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            animation: modalFadeIn 0.3s ease;
+        }
+        #times-up-overlay h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 56px; font-weight: 900;
+            color: var(--neon-pink);
+            text-shadow: 0 0 30px rgba(255,45,117,0.6);
+            animation: celebPulse 0.8s ease-in-out infinite alternate;
+        }
+        #times-up-overlay p {
+            color: rgba(255,255,255,0.7);
+            font-size: 16px;
+        }
+        #times-up-overlay button {
+            background: var(--neon-pink);
+            color: white; border: none;
+            padding: 14px 35px;
+            border-radius: 25px;
+            font-size: 15px; font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        #times-up-overlay button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 45, 117, 0.6);
+        }
     </style>
 </head>
 <body>
@@ -1121,34 +1353,34 @@
 
     <!-- How To Guide -->
     <div id="how-to-guide">
-        <h2 class="pulse-text">✨ How to Play</h2>
+        <h2 class="pulse-text"><svg class="neon-icon" viewBox="0 0 24 24"><polygon points="12,2 14.5,9.5 22,12 14.5,14.5 12,22 9.5,14.5 2,12 9.5,9.5" fill="var(--neon-pink)" stroke="none"/></svg> How to Play</h2>
         <div class="step-list">
             <div class="step-item">
-                <div class="step-icon">✊</div>
+                <div class="step-number">1</div>
                 <div><b>Make a Fist</b> to see the framing grid box.</div>
             </div>
             <div class="step-item">
-                <div class="step-icon">🖐️</div>
+                <div class="step-number">2</div>
                 <div><b>Open Hand</b> to capture and create your puzzle!</div>
             </div>
         </div>
-        <button id="start-game-btn">START PLAYING ✨</button>
+        <button id="start-game-btn">START PLAYING <svg class="neon-icon" viewBox="0 0 24 24" style="stroke:#fff;filter:drop-shadow(0 0 4px #fff)"><polygon points="12,2 14.5,9.5 22,12 14.5,14.5 12,22 9.5,14.5 2,12 9.5,9.5" fill="#fff" stroke="none"/></svg></button>
     </div>
 
     <!-- Loading -->
-    <div class="loading-text high-tech-font" id="loading-text">⌛ Loading...</div>
+    <div class="loading-text high-tech-font" id="loading-text"><svg class="neon-icon" viewBox="0 0 24 24"><path d="M5 3h14M5 21h14M7 3v4l5 5-5 5v4m10-18v4l-5 5 5 5v4"/></svg> Loading...</div>
 
     <!-- Leaderboard Input Modal -->
     <div id="leaderboard-modal">
-        <h2>🏆 Well Done!</h2>
-        <p>✨ You completed the puzzle in <strong id="modal-moves-count">0</strong> moves! ✨</p>
+        <h2><svg class="neon-icon" viewBox="0 0 24 24"><path d="M8 21h8m-4-4v4m-6-17h12v3a6 6 0 0 1-12 0V4zM6 4H4v2a3 3 0 0 0 3 3m9-5h2v2a3 3 0 0 1-3 3"/></svg> Well Done!</h2>
+        <p>You completed the puzzle in <strong id="modal-moves-count">0</strong> moves!</p>
         <input type="text" id="user-name-input" placeholder="Your Name" maxlength="20">
-        <button id="save-score-btn">💾 Save</button>
+        <button id="save-score-btn"><svg class="neon-icon" viewBox="0 0 24 24" style="stroke:#fff;filter:none"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8m0-18v5h8"/></svg> Save</button>
     </div>
 
     <!-- Leaderboard Display -->
     <div id="leaderboard-display">
-        <h3>👑 Top Rankings</h3>
+        <h3><svg class="neon-icon" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M3 18h18l-3-12-4 4-2-6-2 6-4-4z"/></svg> Top Rankings</h3>
         <div class="leaderboard-header">
             <span>#</span>
             <span>Name</span>
@@ -1160,9 +1392,52 @@
         </div>
     </div>
 
+    <!-- Mode Selection Modal -->
+    <div id="mode-select-modal">
+        <h2 class="pulse-text"><svg class="neon-icon" viewBox="0 0 24 24" style="width:36px; height:36px; vertical-align:middle; margin-right:10px;"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M7 12h3m-1.5-1.5v3m7-1.5h.01m2-2h.01"/></svg> Choose Your Mode</h2>
+        <p>How do you want to play?</p>
+        <div class="mode-options">
+            <div class="mode-card" id="chill-mode-btn">
+                <div class="mode-icon"><svg class="neon-icon" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3"/></svg></div>
+                <div class="mode-title">Chill</div>
+                <div class="mode-desc">No timer pressure.<br>Solve at your own pace.</div>
+            </div>
+            <div class="mode-card" id="rush-mode-btn">
+                <div class="mode-icon"><svg class="neon-icon" viewBox="0 0 24 24"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="var(--neon-pink)" stroke="none"/></svg></div>
+                <div class="mode-title">Rush</div>
+                <div class="mode-desc">Beat the clock!<br>Choose your time limit.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timer Selection Modal (Rush mode) -->
+    <div id="timer-select-modal">
+        <h2 class="pulse-text"><svg class="neon-icon" viewBox="0 0 24 24" style="width:36px; height:36px; vertical-align:middle; margin-right:10px;"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M7 12h3m-1.5-1.5v3m7-1.5h.01m2-2h.01"/></svg> Set Your Timer</h2>
+        <p>How much time do you want?</p>
+        <div class="timer-options">
+            <button class="timer-option-btn" data-time="60">
+                <span class="timer-value">60</span>
+                <span class="timer-label">seconds</span>
+            </button>
+            <button class="timer-option-btn" data-time="90">
+                <span class="timer-value">90</span>
+                <span class="timer-label">seconds</span>
+            </button>
+            <button class="timer-option-btn" data-time="120">
+                <span class="timer-value">120</span>
+                <span class="timer-label">seconds</span>
+            </button>
+            <button class="timer-option-btn" data-time="200">
+                <span class="timer-value">200</span>
+                <span class="timer-label">seconds</span>
+            </button>
+        </div>
+        <button class="modal-back-btn" id="timer-back-btn">← Back</button>
+    </div>
+
     <!-- Grid Size Selector Modal -->
     <div id="grid-select-modal">
-        <h2 class="pulse-text">🧩 Choose Puzzle Size</h2>
+        <h2 class="pulse-text"><svg class="neon-icon" viewBox="0 0 24 24" style="width:36px; height:36px; vertical-align:middle; margin-right:10px;"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M7 12h3m-1.5-1.5v3m7-1.5h.01m2-2h.01"/></svg> Choose Puzzle Size</h2>
         <p>Pick the difficulty level for your puzzle</p>
         <div class="grid-options">
             <button class="grid-option-btn" data-size="3">
@@ -1196,6 +1471,14 @@
                 <span class="grid-pieces">25 pieces</span>
             </button>
         </div>
+        <button class="modal-back-btn" id="grid-back-btn">← Back</button>
+    </div>
+
+    <!-- Time's Up Overlay (Rush mode) -->
+    <div id="times-up-overlay">
+        <h1><svg class="neon-icon" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M5 3L2 6m20-3l-3 3"/></svg> Time's Up!</h1>
+        <p>You ran out of time. Better luck next round!</p>
+        <button id="times-up-retry-btn"><svg class="neon-icon" viewBox="0 0 24 24" style="stroke:#fff;filter:none"><path d="M1 4v6h6m16 10v-6h-6"/><path d="M20.5 9A9 9 0 0 0 5.6 5.6L1 10m22 4l-4.6 4.4A9 9 0 0 1 3.5 15"/></svg> Try Again</button>
     </div>
 
     <!-- Application Bundle -->
@@ -1205,19 +1488,19 @@
         <h2 class="pulse-text">How to Solve</h2>
         <div class="step-list">
             <div class="step-item">
-                <div class="step-icon">🤏</div>
+                <div class="step-number">1</div>
                 <div><b>Pinch</b> your thumb and index finger to pick a piece.</div>
             </div>
             <div class="step-item">
-                <div class="step-icon">↔️</div>
+                <div class="step-number">2</div>
                 <div><b>Move</b> your hand to drag the piece to its spot.</div>
             </div>
             <div class="step-item">
-                <div class="step-icon">🖐️</div>
+                <div class="step-number">3</div>
                 <div><b>Release</b> your hand to drop and place it!</div>
             </div>
         </div>
-        <button id="got-it-btn">GOT IT! ✨</button>
+        <button id="got-it-btn">GOT IT!</button>
     </div>
 </body>
 </html>

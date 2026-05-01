@@ -40,6 +40,9 @@ class PuzzleGameApp {
         this.gotItBtn = document.getElementById('got-it-btn');
         this.gridSelectModal = document.getElementById('grid-select-modal');
         this.totalPiecesEl = document.getElementById('total-pieces');
+        this.modeSelectModal = document.getElementById('mode-select-modal');
+        this.timerSelectModal = document.getElementById('timer-select-modal');
+        this.timesUpOverlay = document.getElementById('times-up-overlay');
 
         this.frameCtx = this.frameCanvas ? this.frameCanvas.getContext('2d') : null;
         this.puzzleCtx = this.puzzleCanvas ? this.puzzleCanvas.getContext('2d') : null;
@@ -50,6 +53,8 @@ class PuzzleGameApp {
 
         this.state = 'camera'; // camera | framing | puzzle | solved
         this.gridSize = 3; // default grid size
+        this.gameMode = 'chill'; // 'chill' or 'rush'
+        this.rushDuration = 0; // seconds for rush mode countdown
         this.captureCanvas = document.createElement('canvas');
         this.selectedPiece = null;
         this.lastPos = { x: 0, y: 0 };
@@ -88,10 +93,62 @@ class PuzzleGameApp {
             this.shuffleBtn.addEventListener('click', () => this.shufflePuzzle());
             this.resetBtn.addEventListener('click', () => this.resetPuzzle());
             this.saveScoreBtn.addEventListener('click', () => this.saveScore());
+
+            // Start Playing → show mode selection (not grid selection directly)
             if (this.startGameBtn) {
                 this.startGameBtn.addEventListener('click', () => {
                     if (this.howToGuide) this.howToGuide.style.display = 'none';
+                    if (this.modeSelectModal) this.modeSelectModal.style.display = 'flex';
+                });
+            }
+
+            // Mode selection handlers
+            const chillBtn = document.getElementById('chill-mode-btn');
+            const rushBtn = document.getElementById('rush-mode-btn');
+            if (chillBtn) {
+                chillBtn.addEventListener('click', () => {
+                    this.gameMode = 'chill';
+                    this.rushDuration = 0;
+                    if (this.modeSelectModal) this.modeSelectModal.style.display = 'none';
                     if (this.gridSelectModal) this.gridSelectModal.style.display = 'flex';
+                });
+            }
+            if (rushBtn) {
+                rushBtn.addEventListener('click', () => {
+                    this.gameMode = 'rush';
+                    if (this.modeSelectModal) this.modeSelectModal.style.display = 'none';
+                    if (this.timerSelectModal) this.timerSelectModal.style.display = 'flex';
+                });
+            }
+
+            // Timer selection handlers (Rush mode)
+            document.querySelectorAll('.timer-option-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    this.rushDuration = parseInt(btn.dataset.time);
+                    if (this.timerSelectModal) this.timerSelectModal.style.display = 'none';
+                    if (this.gridSelectModal) this.gridSelectModal.style.display = 'flex';
+                });
+            });
+
+            // Timer back button → go back to mode selection
+            const timerBackBtn = document.getElementById('timer-back-btn');
+            if (timerBackBtn) {
+                timerBackBtn.addEventListener('click', () => {
+                    if (this.timerSelectModal) this.timerSelectModal.style.display = 'none';
+                    if (this.modeSelectModal) this.modeSelectModal.style.display = 'flex';
+                });
+            }
+
+            // Grid back button → go back to mode or timer selection
+            const gridBackBtn = document.getElementById('grid-back-btn');
+            if (gridBackBtn) {
+                gridBackBtn.addEventListener('click', () => {
+                    if (this.gridSelectModal) this.gridSelectModal.style.display = 'none';
+                    if (this.gameMode === 'rush') {
+                        if (this.timerSelectModal) this.timerSelectModal.style.display = 'flex';
+                    } else {
+                        if (this.modeSelectModal) this.modeSelectModal.style.display = 'flex';
+                    }
                 });
             }
 
@@ -109,6 +166,15 @@ class PuzzleGameApp {
                 this.gotItBtn.addEventListener('click', () => {
                     if (this.solveGuide) this.solveGuide.style.display = 'none';
                     this.startTimer();
+                });
+            }
+
+            // Time's Up retry button
+            const timesUpRetryBtn = document.getElementById('times-up-retry-btn');
+            if (timesUpRetryBtn) {
+                timesUpRetryBtn.addEventListener('click', () => {
+                    if (this.timesUpOverlay) this.timesUpOverlay.style.display = 'none';
+                    this.closePuzzle();
                 });
             }
 
@@ -299,10 +365,41 @@ class PuzzleGameApp {
     startTimer() {
         this.timerEl.style.display = 'block';
         this.timerStart = Date.now();
-        this.timerInterval = setInterval(() => {
-            const s = Math.floor((Date.now() - this.timerStart) / 1000);
-            this.timerEl.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-        }, 100);
+
+        if (this.gameMode === 'rush') {
+            // Countdown timer for rush mode
+            this.timerEl.textContent = `${String(Math.floor(this.rushDuration / 60)).padStart(2, '0')}:${String(this.rushDuration % 60).padStart(2, '0')}`;
+            this.timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - this.timerStart) / 1000);
+                const remaining = this.rushDuration - elapsed;
+                if (remaining <= 0) {
+                    clearInterval(this.timerInterval);
+                    this.timerEl.textContent = '00:00';
+                    this.onTimesUp();
+                    return;
+                }
+                this.timerEl.textContent = `${String(Math.floor(remaining / 60)).padStart(2, '0')}:${String(remaining % 60).padStart(2, '0')}`;
+                // Flash red when under 10 seconds
+                if (remaining <= 10) {
+                    this.timerEl.style.color = '#ff4444';
+                    this.timerEl.style.borderColor = 'rgba(255,68,68,0.5)';
+                } else {
+                    this.timerEl.style.color = '';
+                    this.timerEl.style.borderColor = '';
+                }
+            }, 100);
+        } else {
+            // Count-up timer for chill mode
+            this.timerInterval = setInterval(() => {
+                const s = Math.floor((Date.now() - this.timerStart) / 1000);
+                this.timerEl.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+            }, 100);
+        }
+    }
+
+    onTimesUp() {
+        this.state = 'solved'; // stop piece interaction
+        if (this.timesUpOverlay) this.timesUpOverlay.style.display = 'flex';
     }
 
     // ===== PUZZLE STATE =====
@@ -456,6 +553,8 @@ class PuzzleGameApp {
         this.lastFrameDisplay = null;
         this.lastFrameRaw = null;
         clearInterval(this.timerInterval);
+        this.timerEl.style.color = '';
+        this.timerEl.style.borderColor = '';
         this.puzzleCanvas.classList.remove('active');
         this.timerEl.style.display = 'none';
         this.closeBtn.style.display = 'none';
@@ -467,7 +566,9 @@ class PuzzleGameApp {
         if (this.solutionContainer) this.solutionContainer.style.display = 'none';
         if (this.leaderboardModal) this.leaderboardModal.style.display = 'none';
         if (this.leaderboardDisplay) this.leaderboardDisplay.style.display = 'none';
-        if (this.gridSelectModal) this.gridSelectModal.style.display = 'flex';
+        if (this.timesUpOverlay) this.timesUpOverlay.style.display = 'none';
+        // Return to mode selection (not grid selection)
+        if (this.modeSelectModal) this.modeSelectModal.style.display = 'flex';
         this.selectedPiece = null;
         this.imageCache = {};
     }
